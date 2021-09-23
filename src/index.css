@@ -3,6 +3,7 @@ html, body, #root, .app {
     margin: 0px;
     padding: 0px;
     height: 100%;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
 .app {
@@ -16,6 +17,10 @@ html, body, #root, .app {
 }
 
 #paper-container {
-    grid-area: paper;
     background-color: white;
+}
+
+#paper-wrapper {
+    grid-area: paper;
+    overflow: hidden;
 }

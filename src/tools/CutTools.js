@@ -70,8 +70,8 @@ let current_pos = {
 //TODO: THIS NEEDS TO CHANGE BASED ON HOW MANY THINGS ARE IN THE
 //CUT AND WHERE THEY ARE
 const MIN_SIZE = {
-    width: 80,
-    height: 80
+    width: 40,
+    height: 40
 }
 
 /**
@@ -90,6 +90,10 @@ function resize_mousedown(event) {
     $(document).on('mouseup', { target }, resize_mouseup);
     $(document).on('mousemove', { target, direction: event.target.getAttribute('data-direction') },  resize_mousemove);
     event.stopPropagation();
+
+    if (target.get('parent')) {
+        graph.getCell(target.get('parent')).unembed(target);
+    }
 }
 
 /**

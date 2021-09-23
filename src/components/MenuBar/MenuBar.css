@@ -1,7 +1,7 @@
 .header-bar {
   display: flex;
   flex-direction: row;
-  background-color: #006d77;
+  background-color: #293241;
   grid-area: header;
   padding: 10px;
   text-align: center;
@@ -10,10 +10,17 @@
 .menu-item {
   height: 100%;
   padding: 0;
+  color: #E0FBFC;
+  line-height: 100%;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
 }
-img {
-  margin: 0;
-}
+
+
 
 h4 {
   margin: 0;
