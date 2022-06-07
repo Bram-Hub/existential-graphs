@@ -1,0 +1,9 @@
+
+.workspace {
+    display: grid;
+
+    grid-template-areas: 
+        'side   paper  paper'; 
+    grid-template-columns: 15vw auto auto;
+    overflow: hidden;
+}

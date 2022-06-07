@@ -1,11 +1,6 @@
 import * as joint from 'jointjs'
 import _ from 'lodash'
-import { graph } from '../../index.js'
-import { addPremiseTools } from '../../tools/PremiseTools.js'
 import './Premise.css'
-import { handleCollisions } from '../../util/collisions.js'
-import Pop from '../../sounds/pop.wav'
-import { color } from '../../util/color.js'
 // class for premises (letters)
 
 const PREMISE_DEFAULTS = {
@@ -36,7 +31,8 @@ const PREMISE_DEFAULTS = {
       'x-alignment': 'middle',
       'y-alignment': 'middle'
     }
-  }
+  },
+  graph: {}
 }
 
 export class Premise extends joint.dia.Element {
@@ -60,8 +56,7 @@ export class Premise extends joint.dia.Element {
     }]
 
     //custom constructor for shape, should more or less always use this over the default constructor
-    create(config) {
-
+    create(config, sheet, fast) {
         const options = _.cloneDeep(PREMISE_DEFAULTS);
 
         if (config) {
@@ -70,9 +65,10 @@ export class Premise extends joint.dia.Element {
           options.attrs.rect = Object.assign(options.attrs.rect, config.attrs && config.attrs.rect);
           options.attrs.text = Object.assign(options.attrs.text, config.attrs && config.attrs.text);
         }
+        options.sheet = sheet;
 
-        let premise = new Premise({
-          markup: '<g class="rotatable"><g class="scalable"><rect/></g><text/></g>',
+        const premise = new Premise({
+          markup: '<g class="rotatable"><rect/><text/></g>',
           position: {
               ...options.position
           },
@@ -90,20 +86,25 @@ export class Premise extends joint.dia.Element {
           },
           // set custom attributes here:
         });
-        console.log(premise);
-        premise.addTo(graph)
-        //add tools (some events events also)
-        addPremiseTools(premise)
-        handleCollisions(premise)
 
-        // Play pop sound
-        let pop = new Audio(Pop); 
-        pop.play();
+        //have to set this out here since we actually do want a reference to this object, not a copy
+        premise.sheet = options.sheet;
+
+        premise.addTo(premise.sheet.graph)
+      
+        //add tools (some events events also)
+        if(!fast) this.addTools(premise);
+
         return premise;
     }
 
     destroy() {
       this.remove();
+      this.sheet.paper.handleDeleteCell();
+    }
+
+    obliterate() {
+      this.destroy();
     }
   
     active() {
@@ -113,6 +114,64 @@ export class Premise extends joint.dia.Element {
     inactive(){
       return;
     }
+
+    getBoundingBox() {
+      return  {
+                width: this.attributes.attrs.rect.width,
+                height: this.attributes.attrs.rect.height,
+                x: this.attributes.position.x,
+                y: this.attributes.position.y
+              }
+    }
+
+    getArea() {
+      return this.attributes.attrs.rect.width * this.attributes.attrs.rect.height;
+    }
+        
+    // move(position, timestep = 1000, frames = 500) {
+    //   let difference = {
+    //     x: position.x - this.attributes.position.x,
+    //     y: position.y - this.attributes.position.y
+    //   }
+    //   let step = {
+    //     x: difference.x / frames,
+    //     y: difference.y / frames
+    //   }
+    //   for (let i = 0; i < frames; i++) {
+    //     this.position(this.attributes.position.x + step.x, this.attributes.position.y + step.y);
+    //     this.sleep(timestep);
+    //   }
+    //   console.log("move over!");
+    // }
+
+    // sleep(ms) {
+    //   return new Promise(resolve => setTimeout(resolve, ms));
+    // }
+    
+
+    //TODO: see Cut.addTools()
+    addTools(element) {
+      //element view is in charge of rendering the elements on the paper
+      let elementView = element.findView(element.sheet.paper.jpaper);
+      //clear any old tools
+      elementView.removeTools();
+      // boundary tool shows boundaries of element
+      let boundaryTool = new joint.elementTools.Boundary();
+  
+      let rect_tools = [boundaryTool];
+  
+      let toolsView = new joint.dia.ToolsView({
+          tools: rect_tools
+      });
+  
+      elementView.addTools(toolsView);
+      //start with tools hidden
+      elementView.hideTools();
+      // element.on("change:position", function (eventView) {
+      //     element.toFront();
+      // });
+      // --- end of paper events -----
+  }
 
 }
 
